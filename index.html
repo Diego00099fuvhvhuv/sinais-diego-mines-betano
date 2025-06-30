@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sinais Diego Mines Betano</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 2rem auto; }
+    button { font-size: 1rem; padding: 0.5rem 1rem; margin: 0.5rem 0; }
+    #sinal { font-size: 1.2rem; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    td, th { border: 1px solid #999; padding: 0.5rem; text-align: center; }
+    .acerto { color: green; }
+    .erro { color: red; }
+    #resultado { font-weight: bold; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Sinais Diego Mines Betano</h1>
+  <button id="gerar">Gerar Sinal</button>
+  <div id="sinal">Clique em “Gerar Sinal”</div>
+
+  <h2>Histórico (últimas 10)</h2>
+  <table>
+    <thead><tr><th>#</th><th>Sinal (3)</th><th>Resultado</th></tr></thead>
+    <tbody id="historico"></tbody>
+  </table>
+
+  <button id="verificar">Verificar Assertividade</button>
+  <div id="resultado"></div>
+
+  <script>
+    const historico = [];
+    document.getElementById('gerar').onclick = () => {
+      // Gera 3 cliques distintos (1 a 5 linha, 1 a 5 coluna)
+      const sugeridos = [];
+      while(sugeridos.length < 3) {
+        const escolha = [Math.ceil(Math.random()*5), Math.ceil(Math.random()*5)];
+        const key = escolha.join(',');
+        if (!sugeridos.some(e => e.join(',') === key))
+          sugeridos.push(escolha);
+      }
+      document.getElementById('sinal').innerText = sugeridos.map(c=>`[${c[0]},${c[1]}]`).join(', ');
+      // Adiciona ao histórico
+      historico.unshift({ sinal: [...sugeridos], resultado: null });
+      if (historico.length > 10) historico.pop();
+      renderizarHistorico();
+    };
+
+    function renderizarHistorico() {
+      const tbody = document.getElementById('historico');
+      tbody.innerHTML = '';
+      historico.forEach((h, i) => {
+        const tr = document.createElement('tr');
+        const sinalTd = document.createElement('td');
+        sinalTd.innerText = h.sinal.map(c=>`[${c[0]},${c[1]}]`).join(', ');
+
+        const resTd = document.createElement('td');
+        if (h.resultado === null) {
+          const btnA = document.createElement('button');
+          btnA.innerText = '✅';
+          btnA.onclick = () => marcar(i, true);
+          const btnE = document.createElement('button');
+          btnE.innerText = '❌';
+          btnE.onclick = () => marcar(i, false);
+          resTd.appendChild(btnA);
+          resTd.appendChild(btnE);
+        } else {
+          resTd.innerText = h.resultado ? '✔ Acertou' : '✖ Errou';
+          resTd.className = h.resultado ? 'acerto' : 'erro';
+        }
+
+        tr.appendChild(document.createElement('td')).innerText = i+1;
+        tr.appendChild(sinalTd);
+        tr.appendChild(resTd);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function marcar(idx, acerto) {
+      historico[idx].resultado = acerto;
+      renderizarHistorico();
+    }
+
+    document.getElementById('verificar').onclick = () => {
+      const marcados = historico.filter(h=>h.resultado!==null);
+      if (marcados.length === 0) {
+        document.getElementById('resultado').innerText = 'Marque ao menos um resultado.';
+        return;
+      }
+      const hits = marcados.filter(h=>h.resultado).length;
+      const taxa = Math.round(hits / marcados.length * 100);
+      let texto = `Assertividade: ${taxa}% — `;
+      if (taxa >= 90) texto += 'Excelente ✅';
+      else if (taxa >= 70) texto += 'Boa 🙂';
+      else texto += 'Ruim ❌';
+      document.getElementById('resultado').innerText = texto;
+    };
+  </script>
+</body>
+</html>
